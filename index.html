@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Tulsa County Ballot Guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap">
+<style>
+/* Layout: TPS bond-dashboard theme (dark navy, Bebas Neue, Plex Mono labels). Sticky tab bar, one view per ballot section, each section color-coded; candidate cards in a responsive grid. Deliberately dark-only, matching the source theme. */
+:root {
+  --bg: #07090f;
+  --surface: #0e1420;
+  --surface2: #141d2e;
+  --surface3: #1a2540;
+  --border: #1c2a40;
+  --text: #dce6f5;
+  --muted: #6f84a3;
+  --p1: #f5a623;
+  --p2: #38bdf8;
+  --p3: #a78bfa;
+  --p4: #84cc16;
+  --p5: #2dd4bf;
+  --pro: #34d399;
+  --con: #f43f5e;
+  --f-display: "Bebas Neue", Impact, "Arial Narrow", sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body { background: var(--bg); color: var(--text); font: 15px/1.6 var(--f-body); min-height: 100%; overflow-x: hidden; }
+body::after {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse at 15% 30%, rgba(245,166,35,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 20%, rgba(56,189,248,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 85%, rgba(167,139,250,0.04) 0%, transparent 50%);
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 101; background: var(--surface); }
+a { color: var(--p2); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--p2); outline-offset: 2px; }
+
+/* NAV */
+nav.tabs {
+  display: flex; background: var(--surface); border-bottom: 1px solid var(--border);
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 100;
+  overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity;
+  padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px);
+}
+nav.tabs::-webkit-scrollbar { display: none; }
+@media (max-width: 760px) {
+  nav.tabs { -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); }
+  .tab { padding: 15px 14px; }
+  .card { padding: 16px; }
+  .panel-head, .panel-text { padding-left: 16px; padding-right: 16px; }
+  .plist li { padding-left: 16px; padding-right: 16px; }
+}
+.tab {
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  padding: 15px 22px; border: 0; border-right: 1px solid var(--border); border-bottom: 3px solid transparent;
+  background: none; color: var(--muted); cursor: pointer; white-space: nowrap; scroll-snap-align: start;
+  transition: color .2s, background .2s; display: flex; gap: 8px; align-items: center;
+}
+.tab:hover { color: var(--text); background: var(--surface2); }
+.tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--c, #fff); background: var(--surface2); }
+.tab .ct { font-size: 10px; color: var(--c, var(--muted)); letter-spacing: 1px; }
+
+.view { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding-block: 36px 64px;
+  padding-left: max(48px, env(safe-area-inset-left, 0px)); padding-right: max(48px, env(safe-area-inset-right, 0px)); }
+@media (max-width: 1100px) { .view { padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); } }
+@media (max-width: 760px) { .view { padding-block: 20px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); } }
+
+.label { font-family: var(--f-mono); font-size: 11px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; }
+
+/* HERO */
+.hero { text-align: center; padding: 32px 0 44px; border-bottom: 1px solid var(--border); margin-bottom: 40px; display: grid; gap: 12px; justify-items: center; }
+.hero-total { font-family: var(--f-display); font-size: clamp(52px, 10vw, 120px); letter-spacing: 4px; line-height: .95; text-wrap: balance;
+  background: linear-gradient(135deg, var(--p1), var(--p2), var(--p3), var(--p4)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.hero-sub { font-size: 15px; color: var(--muted); max-width: 62ch; }
+.hero-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 6px; }
+.pill { font-family: var(--f-mono); font-size: 11px; letter-spacing: 1px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--muted); }
+.pill b { color: var(--text); font-weight: 600; }
+
+.section-title { margin-bottom: 16px; }
+.block { margin-bottom: 40px; }
+
+/* Section cards on overview */
+.sec-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.sec-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px 20px; cursor: pointer; text-align: left;
+  position: relative; overflow: hidden; transition: transform .2s, border-color .2s, box-shadow .2s; display: grid; gap: 6px; }
+.sec-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 4px; background: var(--c); }
+.sec-card:hover { transform: translateY(-3px); border-color: var(--c); box-shadow: 0 8px 32px rgba(0,0,0,.4); }
+.sec-name { font-family: var(--f-display); font-size: 26px; letter-spacing: 1px; line-height: 1.05; }
+.sec-desc { font-size: 13px; color: var(--muted); }
+.sec-count { font-family: var(--f-display); font-size: 40px; letter-spacing: 2px; color: var(--c); line-height: 1; margin-top: 6px; }
+.bar { height: 4px; background: var(--bg); border-radius: 2px; overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--c); border-radius: 2px; transition: width .6s cubic-bezier(.16,1,.3,1); }
+.hint { font-family: var(--f-mono); font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-top: 8px; }
+
+.notes { display: grid; gap: 10px; }
+.note { display: flex; gap: 16px; align-items: flex-start; padding: 16px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+.note-body { flex: 1; min-width: 0; }
+.note-title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+.note-text { font-size: 13px; color: var(--muted); }
+.tag { font-family: var(--f-mono); font-size: 10px; letter-spacing: 1px; padding: 3px 8px; border-radius: 3px; white-space: nowrap; font-weight: 600; border: 1px solid; flex-shrink: 0; }
+.tag-blue { background: rgba(56,189,248,.12); color: var(--p2); border-color: rgba(56,189,248,.3); }
+.tag-yellow { background: rgba(245,166,35,.12); color: var(--p1); border-color: rgba(245,166,35,.3); }
+.tag-red { background: rgba(244,63,94,.12); color: var(--con); border-color: rgba(244,63,94,.3); }
+@media (max-width: 560px) { .note { flex-direction: column; gap: 8px; } }
+
+/* VIEW HEADER */
+.pv-head { margin-bottom: 24px; display: grid; gap: 6px; }
+.pv-head h2 { font-family: var(--f-display); font-size: clamp(34px, 5vw, 52px); letter-spacing: 2px; line-height: 1; color: var(--text); }
+.pv-head h2 span { color: var(--c); }
+.pv-intro { color: var(--muted); max-width: 72ch; font-size: 14px; }
+
+.jump { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; margin-bottom: 28px; }
+.jump::-webkit-scrollbar { display: none; }
+.jump a { font-family: var(--f-mono); font-size: 11px; letter-spacing: 1px; text-decoration: none; color: var(--muted); white-space: nowrap;
+  padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); display: flex; gap: 6px; align-items: center; }
+.jump a:hover { color: var(--text); border-color: var(--c); }
+.jump a.done { color: var(--text); }
+.jump a.done::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--c); }
+
+/* CONTEST PANEL */
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 24px; overflow: hidden; scroll-margin-top: calc(env(safe-area-inset-top, 0px) + 64px); }
+.panel-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; align-items: flex-start; }
+.panel-head > div { min-width: 0; display: grid; gap: 4px; }
+.panel-title { font-family: var(--f-display); font-size: 26px; letter-spacing: 1px; line-height: 1.05; }
+.panel-sub { font-family: var(--f-mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+.panel-note { font-size: 13px; color: var(--muted); max-width: 80ch; }
+.status-chip { font-family: var(--f-mono); font-size: 10px; letter-spacing: 1px; padding: 4px 10px; border-radius: 3px; border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
+.status-chip.on { color: var(--c); border-color: var(--c); }
+.panel-text { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 14px; display: grid; gap: 10px; }
+.panel-text p { max-width: 80ch; }
+.panel-text .bg { color: var(--muted); font-size: 13px; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 1px; background: var(--border); }
+.bl { border-top: 1px solid var(--border); padding: 14px 20px 16px; background: rgba(245,166,35,.05); display: grid; gap: 6px; font-size: 13px; }
+.bl-top { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; }
+.bl-label { font-family: var(--f-mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--p1); font-weight: 600; }
+.bl-pick { font-family: var(--f-display); font-size: 19px; letter-spacing: 1px; line-height: 1.1; }
+.bl p { color: var(--muted); max-width: 90ch; }
+.bl a { color: var(--p1); white-space: nowrap; }
+@media (max-width: 760px) { .bl { padding-left: 16px; padding-right: 16px; } }
+.cards.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cards.two .pick { padding: 8px 10px; letter-spacing: 1px; }
+.card { background: var(--surface); padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 10px; min-width: 0; transition: background .15s; position: relative; }
+.card:hover { background: var(--surface2); }
+.card.chosen { background: var(--surface3); }
+.card.chosen::before { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: var(--c); }
+.card-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.cand-name { font-family: var(--f-display); font-size: 24px; letter-spacing: 1px; line-height: 1.05; }
+.party { font-family: var(--f-mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+.bio { font-size: 13px; color: var(--muted); }
+.pc { display: grid; gap: 10px; }
+.pc h4 { font-family: var(--f-mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
+.pros h4 { color: var(--pro); }
+.cons h4 { color: var(--con); }
+.pc ul { list-style: none; display: grid; gap: 6px; font-size: 13px; }
+.pc li { padding-left: 16px; position: relative; }
+.pc li::before { position: absolute; left: 0; top: 0; font-family: var(--f-mono); font-weight: 600; }
+.pros li::before { content: "+"; color: var(--pro); }
+.cons li::before { content: "−"; color: var(--con); }
+.thin { font-size: 13px; color: var(--muted); font-style: italic; }
+
+.pick { margin-top: auto; align-self: flex-start; font-family: var(--f-mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 600;
+  padding: 8px 14px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); cursor: pointer; transition: all .15s; }
+.pick:hover { color: var(--text); border-color: var(--c); }
+.pick[aria-pressed="true"] { background: var(--c); border-color: var(--c); color: #07090f; }
+
+/* PICKS */
+.picks-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 20px; margin-bottom: 24px; }
+.plist { list-style: none; }
+.plist li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; padding: 10px 20px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.plist li:last-child { border-bottom: 0; }
+.plist li span:first-child { color: var(--muted); }
+.plist li a { color: inherit; text-decoration: none; }
+.plist li a:hover { color: var(--text); }
+.plist li.empty span:last-child { color: var(--muted); font-style: italic; }
+.plist li:not(.empty) span:last-child { color: var(--c); font-weight: 600; }
+.btns { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.btn { font-family: var(--f-mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; padding: 11px 18px; border-radius: 4px; cursor: pointer;
+  border: 1px solid var(--bc, var(--p2)); background: var(--bc, var(--p2)); color: #07090f; }
+.btn.ghost { background: transparent; color: var(--text); border-color: var(--border); }
+.btn.ghost:hover { border-color: var(--con); color: var(--con); }
+.status { font-family: var(--f-mono); font-size: 11px; color: var(--muted); }
+
+.sources ul { list-style: none; columns: 2 300px; column-gap: 32px; font-size: 13px; }
+.sources li { break-inside: avoid; padding: 6px 0; border-bottom: 1px solid var(--border); }
+.sources a { color: var(--text); text-decoration: none; }
+.sources a:hover { color: var(--p2); }
+.disclaimer { font-size: 13px; color: var(--muted); max-width: 80ch; margin-bottom: 16px; }
+
+footer { position: relative; z-index: 1; text-align: center; font-family: var(--f-mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 0 16px 32px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<nav class="tabs" id="tabs" role="tablist" aria-label="Ballot sections"></nav>
+<div id="views"></div>
+<footer>Nonpartisan summary · Not an endorsement · General Election Nov 3, 2026</footer>
+
+<script>
+const SECTIONS = [
+  { key: "overview", name: "Overview", color: "#ffffff" },
+  { key: "statewide", name: "Statewide", color: "var(--p1)", desc: "Governor down through Corporation Commissioner, plus the straight-party option.", intro: "Eight statewide offices, every one an open seat. The governor's race is mostly about income taxes and school funding." },
+  { key: "federal", name: "Federal", color: "var(--p2)", desc: "U.S. Senate special election and the open 1st District House seat.", intro: "Both seats are open because Kevin Hern is leaving the House to run for the Senate seat Markwayne Mullin vacated." },
+  { key: "courts", name: "District Judges", color: "var(--p3)", desc: "Two contested, nonpartisan Tulsa County district judge races.", intro: "Nonpartisan races. Straight-party voting does not cover these, so mark them yourself." },
+  { key: "retention", name: "Retention", color: "var(--p5)", desc: "Nine yes-or-no votes on keeping appellate judges.", intro: "Each judge needs a majority \"yes\" to serve another six years. The general case for and against applies to every judge; the bio line is specific to each." },
+  { key: "questions", name: "State Questions", color: "var(--p4)", desc: "SQ 845 (judicial nominations) and SQ 847 (property tax caps).", intro: "Both are constitutional amendments sent to voters by the Legislature. Straight-party voting does not cover these." },
+  { key: "picks", name: "My Picks", color: "var(--p2)" },
+];
+
+const RETAIN_YES = [
+  "Keeps an experienced judge on the bench. If a judge loses, the governor fills the seat from a list sent by the Judicial Nominating Commission, so voters do not pick the replacement either way.",
+  "Retention is meant as a check on misconduct or poor performance, not a referendum on single rulings. No public discipline has been reported for any judge on this ballot.",
+  "Unseating judges over single rulings can pressure courts to rule by popularity instead of law.",
+];
+const RETAIN_NO = [
+  "A retention vote is the only direct say voters have over appellate judges. A \"no\" signals disagreement with the court's direction.",
+  "Outside groups on both sides spent heavily in 2024, when Justice Yvonne Kauger became the first Oklahoma justice ever voted out.",
+  "If SQ 845 also passes, the governor would have more say over who replaces any judge you remove. Weigh that either way.",
+];
+
+const DATA = [
+  { s: "statewide", id: "straight", title: "Straight Party Voting", sub: "Vote for one · optional", kind: "race",
+    note: "Marks every candidate of one party in the partisan races. It does not cover the district judges, the retention questions or the state questions. You can also skip it and vote race by race.",
+    options: [
+      { name: "Republican", pros: ["Fast and simple if you plan to back the GOP nominee in every race.", "Republicans hold every statewide office, so this keeps policy direction steady."], cons: ["Skips over individual candidates; Libertarian and independent options get no look.", "Easy to forget the nonpartisan races and state questions."] },
+      { name: "Democratic", pros: ["Fast and simple if you plan to back every Democratic nominee.", "A vote for divided government after years of one-party control."], cons: ["No Democrat is running for State Treasurer, so that race gets no vote from this mark.", "Easy to forget the nonpartisan races and state questions."] },
+      { name: "Libertarian", pros: ["Supports ballot access for a third party, which depends on vote share."], cons: ["Libertarians are running in only three races (Treasurer, Labor Commissioner, U.S. Senate); the rest would be left blank."] },
+    ] },
+  { s: "statewide", id: "governor", title: "Governor", sub: "Vote for one · open seat, Gov. Stitt is term-limited", kind: "race",
+    note: "The core disagreement is taxes: whether to keep cutting the state income tax toward zero, and how schools, hospitals and roads get funded if that happens.",
+    options: [
+      { name: "Mike Mazzei", party: "Republican", bio: "Tulsa financial planner, 12 years in the state Senate, and Gov. Stitt's budget secretary from 2019. Endorsed by President Trump; beat Attorney General Gentner Drummond in the August runoff.",
+        pros: ["Plan to phase out the state income tax, starting with a cut from 4.5% to 3% that he says is offset by other revenue.", "Deep budget experience as a senator and as the state's budget chief.", "Wants a statewide literacy director and more career and technical education."],
+        cons: ["The full cost of eliminating the income tax hasn't been worked out, and reports differ on whether it takes six years or 25.", "Opposes abortion in all circumstances, with no exceptions, which goes further than many voters want.", "Critics worry income tax cuts squeeze funding for rural schools and hospitals."] },
+      { name: "Cyndi Munson", party: "Democrat", bio: "State House Democratic leader from Oklahoma City, in the House since 2015.",
+        pros: ["Would raise public school funding and focus on education and health care.", "Targeted tax relief (a bigger sales tax relief credit and earned income tax credit) aimed at working families instead of across-the-board cuts.", "Would be a check on a Republican legislature with a supermajority."],
+        cons: ["Opposes the broad income tax cuts many Oklahomans want.", "Would end the private-school tax credit that some families now use.", "Likely to face a veto-proof Republican legislature, limiting what she can pass."] },
+      { name: "Orlando Lynn Bush", party: "Independent", thin: true },
+      { name: "Robert E. Brooks Sr.", party: "Independent", thin: true },
+      { name: "Jerry Griffin", party: "Independent", thin: true },
+    ] },
+  { s: "statewide", id: "ltgov", title: "Lieutenant Governor", sub: "Vote for one · open seat", kind: "race",
+    note: "Presides over the state Senate, breaks ties, and steps in if the governor leaves office.",
+    options: [
+      { name: "T. W. Shannon", party: "Republican", bio: "Former Speaker of the Oklahoma House, Chickasaw citizen and bank executive. Trump-endorsed; won the primary outright with about 54%.",
+        pros: ["Has run the House and knows the legislative process from the top.", "Business background as a bank CEO.", "Led a recent poll 51% to 34%."],
+        cons: ["Out of elected office for over a decade, with two unsuccessful U.S. Senate bids since.", "A lieutenant governor from the same party as the legislature adds little independent oversight."] },
+      { name: "Kelly Forbes", party: "Democrat", bio: "Longtime educator, school administrator and small business owner.",
+        pros: ["Brings an educator's view to state leadership.", "An independent voice in a statehouse led by one party."],
+        cons: ["No prior elected office.", "Would have limited influence presiding over a Republican Senate."] },
+    ] },
+  { s: "statewide", id: "ag", title: "Attorney General", sub: "Vote for one · open seat, Drummond ran for governor", kind: "race",
+    options: [
+      { name: "Jon Echols", party: "Republican", bio: "Represented Oklahoma City's House District 90 for 12 years and served as House majority floor leader. Calls himself the \"public safety candidate.\"",
+        pros: ["Says he will defend state laws as written, including the abortion law.", "Long legislative record, including work on medical marijuana regulation.", "Close working relationship with the legislature that writes the laws he'd defend."],
+        cons: ["Career legislator, not a courtroom prosecutor.", "Critics say an AG closely tied to the legislature is less likely to push back on it."] },
+      { name: "Nick Coffey", party: "Democrat", bio: "Seven years as a federal prosecutor in Oklahoma City, handling drug conspiracies, gun crimes, fraud and immigration cases.",
+        pros: ["Hands-on prosecutor with trial experience.", "Says he'd look at the facts of each case before deciding how to defend a challenged law."],
+        cons: ["Supporters of current law worry that approach means he might not fully defend laws such as the abortion ban.", "Would work against a Republican governor and legislature."] },
+    ] },
+  { s: "statewide", id: "treasurer", title: "State Treasurer", sub: "Vote for one · no Democrat filed", kind: "race",
+    options: [
+      { name: "Cindy Byrd", party: "Republican", bio: "State Auditor and Inspector since 2019 and a CPA. Beat incumbent Treasurer Todd Russ with about 62% in June.",
+        pros: ["A CPA who has audited state agencies for years.", "Primary voters chose her decisively over the incumbent."],
+        cons: ["Switched to this race after 15 months running for lieutenant governor, which critics read as political positioning.", "Leaving the auditor's office means the state needs a new watchdog."] },
+      { name: "Kiefer Perry", party: "Libertarian", bio: "Vice-chair of the Oklahoma Libertarian Party, from Broken Arrow.",
+        pros: ["The only alternative to a one-party treasurer's office.", "Brings a small-government lens to state investments and spending."],
+        cons: ["Little public record or financial-management experience reported.", "Low name recognition and long odds."] },
+    ] },
+  { s: "statewide", id: "supt", title: "Superintendent of Public Instruction", sub: "Vote for one · open seat", kind: "race",
+    note: "Runs the State Department of Education, which saw years of conflict with schools and lawmakers before Ryan Walters resigned in 2025.",
+    options: [
+      { name: "Robert Franklin", party: "Republican", bio: "From Sand Springs. Former special education teacher, longtime school and CareerTech administrator, Oklahoma Educators Hall of Fame. Won the August runoff.",
+        pros: ["Decades of school and CareerTech leadership.", "Seen as a lower-drama administrator choice after a turbulent period."],
+        cons: ["The runoff pulled him toward the party line, so expect continued culture-war pressure on the office.", "Opponents want more independence from the governor's agenda."] },
+      { name: "Jennettie Marshall", party: "Democrat", bio: "Served eight years on the Tulsa Public Schools board.",
+        pros: ["Local school governance experience, here in Tulsa.", "Would push back on private-school tax credits and favor public school funding."],
+        cons: ["TPS had serious academic and financial troubles during her board years, which critics will raise.", "No statewide administrative experience."] },
+    ] },
+  { s: "statewide", id: "labor", title: "Commissioner of Labor", sub: "Vote for one · open seat", kind: "race",
+    note: "Handles workplace safety, wage claims and licensing for some trades.",
+    options: [
+      { name: "Kevin West", party: "Republican", bio: "State representative from Moore since 2016. Beat fellow lawmaker John Pfeiffer in the August runoff.",
+        pros: ["Ten years of legislative experience.", "Focus on workplace safety and workforce development."],
+        cons: ["A legislator rather than someone from the labor or safety field.", "Tends to favor a lighter regulatory touch, which worker advocates question."] },
+      { name: "Kevin Dawson", party: "Democrat", bio: "43 years in the railroad industry.",
+        pros: ["Long career on the working floor of a safety-heavy industry.", "Likely to lean toward worker protections."],
+        cons: ["No government or management experience reported.", "Business groups may see him as less friendly to employers."] },
+      { name: "Mike Hall", party: "Libertarian", bio: "Engineer and project manager.",
+        pros: ["Technical and project-management background.", "Would push to trim regulations and licensing rules."],
+        cons: ["Little public profile or detailed platform."] },
+    ] },
+  { s: "statewide", id: "insurance", title: "Insurance Commissioner", sub: "Vote for one · open seat", kind: "race",
+    note: "Regulates insurers, reviews rates and investigates fraud. Oklahoma homeowners insurance costs are among the highest in the country.",
+    options: [
+      { name: "Bob Sullivan", party: "Republican", bio: "Property and casualty insurance professional for about 20 years. Won the August runoff over Marty Quinn.",
+        pros: ["Specializes in property and casualty, the area driving premium increases.", "Campaign built around lowering insurance rates."],
+        cons: ["Industry insider regulating the industry he comes from.", "Rate promises are hard to keep given storm losses."] },
+      { name: "Craig MacIntyre", party: "Democrat", bio: "Small business owner with more than 30 years in insurance.",
+        pros: ["Even longer insurance career.", "Wants lower rates plus stronger fraud investigations."],
+        cons: ["Also an industry insider.", "Lower profile and long odds statewide."] },
+    ] },
+  { s: "statewide", id: "corpcomm", title: "Corporation Commissioner", sub: "Vote for one · open seat", kind: "race",
+    note: "Sets electric and gas rates, regulates oil, gas and pipelines, and now handles data center power demand.",
+    options: [
+      { name: "Brad Boles", party: "Republican", bio: "State representative since 2020, chair of the House energy committee, owner of a manufacturing company. Sponsored Oklahoma's data center law.",
+        pros: ["Knows energy policy from chairing the committee that writes it.", "Pro-growth on data centers and industry."],
+        cons: ["Would be regulating projects under a law he wrote.", "Critics say he leans toward industry over ratepayers."] },
+      { name: "Rhonda Eastman", party: "Democrat", bio: "16 years in state government and over 10 years in private-sector management in trucking, utilities and construction.",
+        pros: ["Calls the commission a ratepayer advocate.", "Would require cleanup of abandoned oil and gas wells and tighter rules on injection wells."],
+        cons: ["Wants to pause new data centers while they are studied, which could cost the state investment.", "No elected experience."] },
+    ] },
+
+  { s: "federal", id: "senate", title: "United States Senator", sub: "Vote for one · special election", kind: "race",
+    options: [
+      { name: "Kevin Hern", party: "Republican", bio: "Tulsa's congressman since 2018 and former McDonald's franchise owner. Sits on Ways and Means, which handles taxes, tariffs and Social Security.",
+        pros: ["Experienced lawmaker who already represents Tulsa.", "Wants to lower health costs and move decisions from insurers back to patients.", "Business background and a large fundraising edge."],
+        cons: ["Reliably votes with party leadership; less independent.", "Leaves the House seat open, adding another new face for Tulsa in Congress."] },
+      { name: "N'Kiyla Jasmine Thomas", party: "Democrat", bio: "Nurse from Ardmore, Chickasaw citizen and military spouse. Beat Jim Priest in the August runoff.",
+        pros: ["Nurse who wants to tackle the nursing shortage and lower health costs.", "Military family and tribal perspectives rarely represented in the Senate."],
+        cons: ["First-time candidate with no legislative experience.", "Far behind in fundraising, and her party is in the minority statewide."] },
+      { name: "Sevier White", party: "Libertarian", bio: "Libertarian Party nominee.", pros: ["A vote for smaller federal government and spending cuts."], cons: ["Little public record; very long odds."] },
+      { name: "Ron Meinhardt", party: "Independent", bio: "A registered Republican running outside the party against its nominee.", pros: ["An option for Republicans unhappy with the nominee."], cons: ["Little campaign infrastructure or coverage."] },
+      { name: "Curtis Stinnett", party: "Independent", thin: true },
+    ] },
+  { s: "federal", id: "house", title: "U.S. Representative, District 1", sub: "Vote for one · open seat", kind: "race",
+    options: [
+      { name: "Mark Tedford", party: "Republican", bio: "State representative. Became the nominee when Jackson Lahmeyer dropped out of the runoff.",
+        pros: ["Legislative experience and conservative positions aligned with the district, which Trump carried by about 18 points."],
+        cons: ["Won the nomination without a runoff vote, so primary voters never fully tested him.", "Another vote for a one-party delegation."] },
+      { name: "John Croisant", party: "Democrat", bio: "Current Tulsa Public Schools board member.",
+        pros: ["Local, Tulsa-focused experience.", "A different voice in an all-Republican Oklahoma delegation."],
+        cons: ["Tied to TPS's struggles in critics' eyes.", "Long odds in a solidly Republican district."] },
+    ] },
+
+  { s: "courts", id: "dj1", title: "District Judge, Office 1", sub: "District 14 · vote for one · nonpartisan", kind: "race",
+    note: "A rematch of 2018, when Wall beat Sawyer 64% to 36%. Neither candidate had a campaign website as of mid-September.",
+    options: [
+      { name: "Tom Sawyer", bio: "Assistant district attorney in Creek County.",
+        pros: ["Current prosecutor with daily courtroom experience.", "A change for voters who want a new perspective on this bench."],
+        cons: ["Lost to Wall decisively in 2018.", "Little public campaign information."] },
+      { name: "Caroline Wall", bio: "The incumbent, on this bench since 2014.",
+        pros: ["Twelve years as a sitting district judge.", "Re-elected over the same challenger before."],
+        cons: ["Voters who want turnover after 12 years may prefer a fresh face.", "Little public campaign information."] },
+    ] },
+  { s: "courts", id: "dj12", title: "District Judge, Office 12", sub: "District 14 · vote for one · nonpartisan", kind: "race",
+    options: [
+      { name: "Christopher Camp", bio: "Tulsa attorney practicing general litigation and employment law. Represented the family of Bobby Barrick in a civil rights lawsuit.",
+        pros: ["Civil litigation and civil rights experience.", "Offers a change from the incumbent."],
+        cons: ["Has never served as a judge.", "Some voters may prefer a prosecutor's background for a general-jurisdiction bench."] },
+      { name: "Kevin Gray", bio: "The incumbent, a former prosecutor first elected in 2022.",
+        pros: ["Sitting judge with prosecution experience.", "Continuity on the bench."],
+        cons: ["Drew criticism in news coverage for his part in the Tulsa County Juvenile Justice Center controversy."] },
+    ] },
+
+  { s: "retention", id: "kane", title: "M. John Kane IV", sub: "Supreme Court · District 1", kind: "retain",
+    bio: "Gov. Stitt's first Supreme Court appointee (2019); former district judge from Pawhuska. Generally seen as one of the court's more conservative members." },
+  { s: "retention", id: "jett", title: "Travis V. Jett", sub: "Supreme Court · District 4", kind: "retain",
+    bio: "From Woodward. Appointed by Gov. Stitt in April 2025 to the seat Justice Kauger lost in 2024. His first retention vote." },
+  { s: "retention", id: "kuehn", title: "Dana Kuehn", sub: "Supreme Court · District 6", kind: "retain",
+    bio: "Former Tulsa County district judge and Court of Criminal Appeals judge, appointed to the Supreme Court by Gov. Stitt in 2021." },
+  { s: "retention", id: "darby", title: "Richard B. Darby", sub: "Supreme Court · District 9", kind: "retain",
+    bio: "Appointed by Gov. Fallin in 2018 and a former chief justice. From southwest Oklahoma." },
+  { s: "retention", id: "hudson", title: "Robert L. Hudson", sub: "Court of Criminal Appeals · District 2", kind: "retain",
+    bio: "On Oklahoma's highest criminal court since a 2015 appointment by Gov. Fallin; formerly a district attorney and district judge in northwest Oklahoma." },
+  { s: "retention", id: "hixon", title: "Stacie L. Hixon", sub: "Court of Civil Appeals · District 1, Office 1", kind: "retain",
+    bio: "Appointed by Gov. Stitt in 2020." },
+  { s: "retention", id: "wiseman", title: "Jane P. Wiseman", sub: "Court of Civil Appeals · District 1, Office 2", kind: "retain",
+    bio: "Tulsa-based judge and one of the longest-serving members of the Court of Civil Appeals." },
+  { s: "retention", id: "barnes", title: "Deborah B. Barnes", sub: "Court of Civil Appeals · District 2, Office 1", kind: "retain",
+    bio: "Long-serving member of the Court of Civil Appeals." },
+  { s: "retention", id: "huber", title: "James R. Huber", sub: "Court of Civil Appeals · District 2, Office 2", kind: "retain",
+    bio: "Member of the Court of Civil Appeals." },
+
+  { s: "questions", id: "sq845", title: "SQ 845: Judicial Nominating Commission", sub: "Legislative Referendum 378 · constitutional amendment", kind: "measure",
+    summary: "Rebuilds the 15-member commission that screens applicants and sends the governor finalists for judicial vacancies. The governor and the Oklahoma Bar Association would each appoint six members, one per current congressional district, and those twelve would choose three at-large members. Any number of members could be lawyers (from Oklahoma or another state). The ban on members' close family practicing law, and party-balance limits on the governor's and at-large picks, would be removed. Members could serve again; at-large terms would be two years, all others six. No fiscal impact.",
+    background: "The commission was created by voters in 1967 after a bribery scandal on the state Supreme Court. Seats are still drawn from the six congressional districts of 1967; Oklahoma now has five.",
+    yes: ["Replaces 1967 district lines that no longer exist.", "Gives the elected governor more say, so the courts better reflect how Oklahomans vote. Supporters say the current setup tilts toward Democrats.", "Lets experienced commissioners be reappointed."],
+    no: ["Removes the party-balance rule, so one party could control the body that screens every appellate and many district judges.", "Lifting the family-member and lawyer limits opens the door to conflicts of interest.", "Undoes protections created after a real corruption scandal."] },
+  { s: "questions", id: "sq847", title: "SQ 847: Property Tax Assessment Caps", sub: "Legislative Referendum 381 · constitutional amendment", kind: "measure",
+    summary: "Starting with tax year 2027, the most a property's taxable value can rise each year drops from 3% to 1.75% for homesteads and farmland, and from 5% to 4% for other property. For homeowners 65 and older, the income limit for the senior freeze goes away and is replaced by a sliding scale: at or below the area median income, no increase at all; above it, yearly caps of 0.35% to 1.75% depending on income. The state says it will cost money, but the amount is unknown.",
+    background: "This limits how fast assessed values grow. It does not change tax rates, and it will not lower anyone's current bill.",
+    yes: ["Slows how fast property tax bills can grow. Supporters say it gives Oklahoma the lowest homestead cap in the country.", "Seniors who earn too much for today's freeze but live on fixed incomes would get some protection.", "Makes future tax bills more predictable for homeowners and farmers."],
+    no: ["Schools, counties, cities and roads rely on property tax; slower growth can mean less money or higher millage rates later.", "Widens the gap between long-time owners and new buyers, whose value resets at sale.", "Critics like OK Policy say some seniors now fully frozen could see small increases, and the cost to the state is unknown.", "It's written into the constitution, so fixing problems later takes another statewide vote."] },
+];
+
+// BatesLine (Michael Bates, Tulsa conservative blog) picks from its 2026 general election posts.
+const BL_CARD = "https://www.batesline.com/archives/2026/11/oklahoma-general-tulsa-runoff-2026.html";
+const BL_RET = "https://www.batesline.com/archives/2026/10/2026-oklahoma-judicial-retention.html";
+const BL_JUD = "https://www.batesline.com/archives/2026/10/2026-tulsa-county-judicial.html";
+const BL = {
+  straight: { pick: "No straight-party pick", url: BL_CARD, text: "Picks Republicans in most races but a Democrat for Superintendent, so a straight Republican ticket wouldn't match his card." },
+  governor: { pick: "Mike Mazzei (R)", url: BL_CARD, text: "Calls him the best conservative choice for lower taxes, fiscal responsibility and school choice, and notes the governor fills court vacancies and appoints regents and State Board of Education members." },
+  ltgov: { pick: "T. W. Shannon (R)", url: BL_CARD, text: "Listed on the ballot card without bold or reasoning." },
+  ag: { pick: "Jon Echols (R)", url: BL_CARD, text: "Listed on the ballot card without bold or reasoning." },
+  treasurer: { pick: "Cindy Byrd (R)", url: BL_CARD, text: "A bolded pick, with no reasoning given." },
+  supt: { pick: "Jennettie Marshall (D)", url: BL_CARD, text: "Says she is no conservative, but backs her for pushing for a state audit of TPS finances, opposing an extension of Superintendent Gist's contract, and holding officials accountable." },
+  labor: { pick: "Kevin West (R)", url: BL_CARD, text: "Listed on the ballot card without bold or reasoning." },
+  insurance: { pick: "Bob Sullivan (R)", url: BL_CARD, text: "Listed on the ballot card without bold or reasoning." },
+  corpcomm: { pick: "Brad Boles (R)", url: BL_CARD, text: "Listed on the ballot card without bold or reasoning." },
+  senate: { pick: "Kevin Hern (R)", url: BL_CARD, text: "Says keeping Republican control of both chambers matters most, to protect the administration's agenda and judicial confirmations." },
+  house: { pick: "Mark Tedford (R)", url: BL_CARD, text: "No race-specific reasoning beyond keeping Republican control of Congress." },
+  dj1: { pick: "Caroline Wall", url: BL_JUD, text: "Calls her a solid judge, much improved since an earlier term that ended in 2006, and lists her as a registered Republican. Says Tom Sawyer isn't actively campaigning and hasn't filed with the Ethics Commission." },
+  dj12: { pick: "Kevin Gray", url: BL_JUD, text: "Recommends the incumbent, a registered Republican, without detailed reasons. Says Christopher Camp isn't actively campaigning and hasn't filed with the Ethics Commission." },
+  kane: { pick: "Yes, retain", url: BL_RET, text: "OCPA judicial score of 79%, lowered by three recusals and his vote with the majority in NonDoc Media v. University of Oklahoma." },
+  jett: { pick: "Yes, retain", url: BL_RET, text: "OCPA score of 84%, the highest of the four justices on this ballot. Docked only for the NonDoc Media majority vote." },
+  kuehn: { pick: "Yes, retain", url: BL_RET, text: "OCPA score of 83%. Faults her for the NonDoc Media majority and for joining the 7-2 majority in Ritter v. State." },
+  darby: { pick: "No, remove", url: BL_RET, text: "OCPA score of 52%. Cites his votes in Ritter, Drummond, the absentee ballot notarization case and the ruling blocking SQ 843, and would rather the next governor appoint a replacement. Says it isn't a clear-cut call." },
+  hudson: { pick: "Yes, retain", url: BL_RET, text: "No OCPA score for this court. Praises his opinions defending state and local criminal jurisdiction against federal encroachment." },
+  hixon: { pick: "Yes, retain", url: BL_RET, text: "No OCPA score. Inclined to keep Gov. Stitt's appointees; she was retained with 67% in 2022." },
+  wiseman: { pick: "No, remove", url: BL_RET, text: "No OCPA score. Objects to her 2003 approval of the Vision 2025 ballot and her officiating a same-sex wedding in 2014, and notes she is a registered Democrat." },
+  barnes: { pick: "No, remove", url: BL_RET, text: "No OCPA score. Notes she is a Gov. Henry appointee and registered Democrat whom Stitt passed over for the Supreme Court in 2019." },
+  huber: { pick: "Yes, retain", url: BL_RET, text: "No OCPA score. Inclined to keep Gov. Stitt's appointees; he was retained with 65% in 2024." },
+  sq845: { pick: "Yes", url: "https://www.batesline.com/archives/2026/10/sq-845-judicial-nominating-commi.html", text: "Calls it a half-measure, but supports it because the governor's appointees would no longer have to be non-lawyers, giving conservative attorneys a chance to serve." },
+  sq847: { pick: "Yes", url: "https://www.batesline.com/archives/2026/10/sq-847-property-tax-valuation.html", text: "Supports lowering the valuation caps and replacing the senior freeze's income limit with income-based brackets. Notes the Oklahoma Farm Bureau also backs it." },
+};
+const blNote = id => { const b = BL[id]; if (!b) return "";
+  return `<aside class="bl"><div class="bl-top"><span class="bl-label">What BatesLine says</span><span class="bl-pick">${esc(b.pick)}</span></div><p>${esc(b.text)} <a href="${b.url}" target="_blank" rel="noopener">Read the post ↗</a></p></aside>`; };
+
+const SOURCES = [
+  ["BatesLine: 2026 general election ballot card", BL_CARD],
+  ["BatesLine: 2026 judicial retention", BL_RET],
+  ["BatesLine: 2026 Tulsa County judicial elections", BL_JUD],
+  ["News 9: Mazzei vs. Munson key issues", "https://www.news9.com/oklahoma-elections/mike-mazzei-cyndi-munson-oklahoma-governor-key-issues"],
+  ["News 9: Governor tax plans", "https://www.news9.com/oklahoma-elections/oklahoma-mazzei-munson-tax-plans"],
+  ["News 9: Lieutenant governor guide", "https://www.news9.com/oklahoma-elections/oklahoma-lieutenant-governor-race-guide-shannon-forbes"],
+  ["News 9: Echols vs. Coffey", "https://www.news9.com/oklahoma-elections/oklahoma-ag-echols-coffey-issues"],
+  ["Oklahoma Voice: Treasurer primary", "https://oklahomavoice.com/2026/06/16/oklahomas-incumbent-treasurer-loses-republican-nomination-for-reelection/"],
+  ["States Newsroom: Franklin wins runoff", "https://www.newsfromthestates.com/article/robert-franklin-wins-gop-runoff-oklahoma-state-superintendent"],
+  ["News 9: Treasurer, Labor, Insurance, Corp. Comm.", "https://www.news9.com/oklahoma-elections/oklahoma-treasurer-labor-insurance-corporation-races"],
+  ["Oklahoma Voice: Labor commissioner", "https://oklahomavoice.com/2026/07/27/republican-lawmakers-face-off-for-party-nomination-to-lead-oklahoma-labor-department/"],
+  ["E&E News: Corporation Commission", "https://www.eenews.net/articles/sponsor-of-oklahoma-data-center-law-wins-gop-regulator-primary/"],
+  ["2026 U.S. Senate election in Oklahoma", "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_Oklahoma"],
+  ["KOKH: Thomas wins nomination", "https://okcfox.com/news/local/nkiyla-thomas-wins-democratic-nomination-for-us-senate-in-oklahoma"],
+  ["News On 6: 1st District race", "https://www.newson6.com/tulsa-oklahoma-news/jackson-lahmeyer-drops-out-of-oklahomas-1st-congressional-district-race"],
+  ["NonDoc: Tulsa County judge races", "https://nondoc.com/2026/06/06/cheat-sheet-retirement-leaves-tulsa-county-district-judge-seat-open/"],
+  ["The Ballot Brief: Tulsa County", "https://theballotbrief.com/state/oklahoma/tulsa-county"],
+  ["NonDoc: 2024 retention results", "https://nondoc.com/2024/11/05/justice-yvonne-kauger-narrowly-ousted-noma-gurich-james-edmondson-retained/"],
+  ["OK Policy: Judicial retention", "https://okpolicy.org/judicial-retention-election/"],
+  ["Ballotpedia: SQ 845", "https://news.ballotpedia.org/2026/04/20/oklahoma-voters-to-decide-constitutional-amendment-changing-judicial-nominating-commission-structure-on-nov-3-2026/"],
+  ["News 9: SQ 845", "https://www.news9.com/oklahoma-elections/oklahoma-state-question-845-judicial-nominations"],
+  ["OK Policy: SQ 847", "https://okpolicy.org/state-question-847-changing-assessment-caps-for-property-tax/"],
+  ["Oklahoma House: Speaker on SQ 847", "https://www.okhouse.gov/posts/news-20260414_2"],
+  ["Oklahoma Voice: SQ 847", "https://oklahomavoice.com/2026/04/27/oklahoma-voters-to-decide-property-tax-question-in-november/"],
+];
+
+// ---------- picks storage ----------
+const KEY = "ballotguide-picks";
+let picks = {};
+try { picks = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { picks = {}; }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(picks)); } catch (e) {} }
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const ul = items => "<ul>" + items.map(i => `<li>${esc(i)}</li>`).join("") + "</ul>";
+const sec = k => SECTIONS.find(x => x.key === k);
+const inSec = k => DATA.filter(c => c.s === k);
+const doneIn = k => inSec(k).filter(c => picks[c.id]).length;
+const contestLabel = c => c.kind === "retain" ? `Retain ${c.title}` : c.title.split(":")[0];
+
+function card(c, choice, head, inner) {
+  const on = picks[c.id] === choice;
+  return `<div class="card${on ? " chosen" : ""}" data-c="${c.id}" data-v="${esc(choice)}">
+    <div class="card-top"><div>${head}</div></div>${inner}
+    <button class="pick" aria-pressed="${on}">${on ? "My pick" : "Mark as my pick"}</button></div>`;
+}
+const pc = (a, pros, b, cons) => `<div class="pc"><div class="pros"><h4>${a}</h4>${ul(pros)}</div><div class="cons"><h4>${b}</h4>${ul(cons)}</div></div>`;
+
+function contestPanel(c) {
+  let pre = "", cards = "";
+  if (c.kind === "race") {
+    cards = c.options.map(o => {
+      const head = `<div class="cand-name">${esc(o.name)}</div>${o.party ? `<div class="party">${o.party}</div>` : ""}`;
+      if (o.thin) return card(c, o.name, head, `<p class="thin">No platform, website or news coverage turned up for this candidate. A vote here mainly registers a choice against both major-party nominees.</p>`);
+      return card(c, o.name, head, (o.bio ? `<p class="bio">${esc(o.bio)}</p>` : "") + pc("Pros", o.pros, "Cons", o.cons));
+    }).join("");
+  } else if (c.kind === "retain") {
+    pre = `<div class="panel-text"><p>${esc(c.bio)}</p></div>`;
+    cards = card(c, "Yes, retain", `<div class="cand-name">Yes</div><div class="party">Keep for six more years</div>`, "") +
+            card(c, "No, remove", `<div class="cand-name">No</div><div class="party">Governor appoints a replacement</div>`, "");
+  } else {
+    pre = `<div class="panel-text"><p>${esc(c.summary)}</p><p class="bg">${esc(c.background)}</p></div>`;
+    cards = card(c, "Yes, for the proposal", `<div class="cand-name">Yes</div><div class="party">For the proposal</div>`, pc("Arguments for", c.yes, "Risk if it passes", [c.no[0]])) +
+            card(c, "No, against the proposal", `<div class="cand-name">No</div><div class="party">Against the proposal</div>`, pc("Arguments against", c.no, "Cost of a no", [c.yes[0]]));
+  }
+  const v = picks[c.id];
+  return `<section class="panel" id="${c.id}">
+    <div class="panel-head"><div><div class="panel-sub">${esc(c.sub)}</div><h3 class="panel-title">${esc(c.title)}</h3>${c.note ? `<p class="panel-note">${esc(c.note)}</p>` : ""}</div>
+    <span class="status-chip${v ? " on" : ""}" data-chip="${c.id}">${v ? esc(v) : "Not marked"}</span></div>
+    ${pre}<div class="cards${c.kind === "retain" ? " two" : ""}">${cards}</div>${blNote(c.id)}</section>`;
+}
+
+function viewOverview() {
+  const total = DATA.length, done = DATA.filter(c => picks[c.id]).length;
+  const d = daysLeft();
+  const cards = SECTIONS.filter(s => s.key !== "overview" && s.key !== "picks").map(s => {
+    const n = inSec(s.key).length, k = doneIn(s.key);
+    return `<button class="sec-card" style="--c:${s.color}" data-go="${s.key}">
+      <span class="label">${n} ${n === 1 ? "contest" : "contests"}</span>
+      <span class="sec-name">${s.name}</span><span class="sec-desc">${s.desc}</span>
+      <span class="sec-count">${k}/${n}</span><span class="bar"><i style="width:${n ? k / n * 100 : 0}%"></i></span>
+      <span class="hint">Open section →</span></button>`;
+  }).join("");
+  return `<div class="hero">
+      <div class="label">General Election · Tulsa County, Oklahoma</div>
+      <h1 class="hero-total">${total} Choices on Your Ballot</h1>
+      <p class="hero-sub">The case for and against every candidate, judge and state question on the Tulsa County ballot. Drawn from candidate statements, news coverage and groups on both sides. Nothing here is an endorsement.</p>
+      <div class="hero-meta"><span class="pill">Election day <b>Tue, Nov 3</b></span><span class="pill">Polls <b>7 a.m. – 7 p.m.</b></span>${d !== null ? `<span class="pill"><b>${d}</b></span>` : ""}<span class="pill">Marked <b>${done} of ${total}</b></span></div>
+    </div>
+    <div class="block"><div class="label section-title">Ballot sections</div><div class="sec-cards">${cards}</div></div>
+    <div class="block"><div class="label section-title">Before you vote</div><div class="notes">
+      <div class="note"><div class="note-body"><div class="note-title">Straight-party voting skips 13 contests</div><div class="note-text">It covers only partisan races. The district judges, all nine retention votes and both state questions must be marked separately.</div></div><span class="tag tag-yellow">Heads up</span></div>
+      <div class="note"><div class="note-body"><div class="note-title">Mark your picks as you read</div><div class="note-text">Each card has a "Mark as my pick" button. Your choices collect on the My Picks tab, saved in this browser only. You can bring notes into the booth.</div></div><span class="tag tag-blue">How to use</span></div>
+      <div class="note"><div class="note-body"><div class="note-title">Bring ID</div><div class="note-text">Oklahoma asks for a photo ID or your county voter ID card at the polls.</div></div><span class="tag tag-blue">Polling place</span></div>
+      <div class="note"><div class="note-body"><div class="note-title">Some entries are thin</div><div class="note-text">Little public information exists for several independent candidates and the Court of Civil Appeals judges. Confirm anything decisive with the Tulsa County Election Board.</div></div><span class="tag tag-red">Limited info</span></div>
+    </div></div>`;
+}
+
+function viewSection(s) {
+  const list = inSec(s.key);
+  const jump = list.map(c => `<a href="#${c.id}" data-jump="${c.id}" class="${picks[c.id] ? "done" : ""}">${esc(c.kind === "retain" ? c.title : contestLabel(c))}</a>`).join("");
+  const general = s.key === "retention" ? `<section class="panel"><div class="panel-head"><div><div class="panel-sub">Applies to every judge below</div><h3 class="panel-title">The case for and against retaining</h3></div></div>
+    <div class="cards"><div class="card">${pc("Case for yes", RETAIN_YES, "Keep in mind", ["A yes also endorses the court's recent rulings, which you may or may not agree with."])}</div>
+    <div class="card">${pc("Case for no", RETAIN_NO, "Keep in mind", ["You don't choose the replacement; the nominating commission and governor do."])}</div></div></section>` : "";
+  const keys = SECTIONS.map(x => x.key), next = SECTIONS[keys.indexOf(s.key) + 1];
+  return `<div class="pv-head"><div class="label">${list.length} contests · ${doneIn(s.key)} marked</div><h2><span>${s.name}</span></h2><p class="pv-intro">${s.intro}</p></div>
+    <div class="jump">${jump}</div>${general}${list.map(contestPanel).join("")}
+    <div class="btns"><button class="btn" style="--bc:${next.color}" data-go="${next.key}">Next: ${next.name} →</button><button class="btn ghost" data-top>Back to top</button></div>`;
+}
+
+function viewPicks() {
+  const groups = SECTIONS.filter(s => s.key !== "overview" && s.key !== "picks").map(s =>
+    `<div class="panel" style="--c:${s.color}"><div class="panel-head"><div><div class="panel-sub">${doneIn(s.key)} of ${inSec(s.key).length} marked</div><h3 class="panel-title" style="color:${s.color}">${s.name}</h3></div></div>
+     <ol class="plist">${inSec(s.key).map(c => `<li class="${picks[c.id] ? "" : "empty"}"><span><a href="#${c.id}" data-find="${c.id}">${esc(contestLabel(c))}</a></span><span>${picks[c.id] ? esc(picks[c.id]) : "Not marked"}</span></li>`).join("")}</ol></div>`).join("");
+  return `<div class="pv-head"><div class="label">Cheat sheet</div><h2><span>My Picks</span></h2><p class="pv-intro">Everything you've marked, in ballot order. Copy it to your phone or notes app to take with you.</p></div>
+    <div class="btns block"><button class="btn" id="copy">Copy my picks</button><button class="btn ghost" id="clear">Clear all</button><span class="status" id="status" role="status"></span></div>
+    <div class="picks-grid">${groups}</div>
+    <div class="block sources"><div class="label section-title">Sources</div>
+      <p class="disclaimer">Built from the Tulsa County sample ballot and October 2026 reporting. Candidate details can change; confirm anything decisive with the Oklahoma State Election Board or the Tulsa County Election Board.</p>
+      <ul>${SOURCES.map(([t, u]) => `<li><a href="${u}" target="_blank" rel="noopener">${esc(t)} ↗</a></li>`).join("")}</ul></div>`;
+}
+
+let current = "overview";
+function show(key, scrollTo) {
+  const s = sec(key) || sec("overview");
+  current = s.key;
+  document.getElementById("tabs").innerHTML = SECTIONS.map(x => {
+    const n = inSec(x.key).length;
+    const ct = x.key === "overview" || x.key === "picks" ? (x.key === "picks" ? `${DATA.filter(c => picks[c.id]).length}/${DATA.length}` : "") : `${doneIn(x.key)}/${n}`;
+    return `<button class="tab" role="tab" style="--c:${x.color}" data-go="${x.key}" aria-selected="${x.key === s.key}">${x.name}${ct ? `<span class="ct">${ct}</span>` : ""}</button>`;
+  }).join("");
+  const v = document.getElementById("views");
+  v.innerHTML = `<main class="view" style="--c:${s.color}">${s.key === "overview" ? viewOverview() : s.key === "picks" ? viewPicks() : viewSection(s)}</main>`;
+  const active = document.querySelector('.tab[aria-selected="true"]');
+  if (active) active.parentNode.scrollLeft = active.offsetLeft - 16;
+  if (scrollTo) { const el = document.getElementById(scrollTo); if (el) el.scrollIntoView(); }
+  else window.scrollTo(0, 0);
+  try { history.replaceState(null, "", "#" + s.key); } catch (e) {}
+}
+
+function daysLeft() {
+  const now = new Date();
+  const d = Math.round((new Date(2026, 10, 3) - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 864e5);
+  return d > 1 ? `${d} days to go` : d === 1 ? "Tomorrow" : d === 0 ? "Today" : null;
+}
+
+function refreshCounts(id) {
+  document.querySelectorAll(`.card[data-c="${id}"]`).forEach(r => {
+    const on = picks[id] === r.dataset.v;
+    r.classList.toggle("chosen", on);
+    const b = r.querySelector(".pick"); b.setAttribute("aria-pressed", on); b.textContent = on ? "My pick" : "Mark as my pick";
+  });
+  const chip = document.querySelector(`[data-chip="${id}"]`);
+  if (chip) { chip.textContent = picks[id] || "Not marked"; chip.classList.toggle("on", !!picks[id]); }
+  const j = document.querySelector(`[data-jump="${id}"]`); if (j) j.classList.toggle("done", !!picks[id]);
+  const head = document.querySelector(".pv-head .label");
+  const s = sec(current);
+  if (head && s && inSec(s.key).length) head.textContent = `${inSec(s.key).length} contests · ${doneIn(s.key)} marked`;
+  document.querySelectorAll(".tab").forEach(t => {
+    const k = t.dataset.go, ct = t.querySelector(".ct"); if (!ct) return;
+    ct.textContent = k === "picks" ? `${DATA.filter(c => picks[c.id]).length}/${DATA.length}` : `${doneIn(k)}/${inSec(k).length}`;
+  });
+}
+
+document.addEventListener("click", e => {
+  if (e.target.closest("[data-top]")) { window.scrollTo(0, 0); return; }
+  const go = e.target.closest("[data-go]");
+  if (go) { show(go.dataset.go); return; }
+  const find = e.target.closest("[data-find]");
+  if (find) { e.preventDefault(); const c = DATA.find(x => x.id === find.dataset.find); show(c.s, c.id); return; }
+  const jump = e.target.closest("[data-jump]");
+  if (jump) { e.preventDefault(); document.getElementById(jump.dataset.jump).scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); return; }
+  const pick = e.target.closest(".pick");
+  if (pick) {
+    const r = pick.closest(".card"), id = r.dataset.c, v = r.dataset.v;
+    if (picks[id] === v) delete picks[id]; else picks[id] = v;
+    save(); refreshCounts(id); return;
+  }
+  if (e.target.id === "copy") {
+    const status = document.getElementById("status");
+    const text = "My ballot picks, Nov 3 2026 (Tulsa County)\n" + DATA.map(c => `${contestLabel(c)}: ${picks[c.id] || "-"}`).join("\n");
+    navigator.clipboard.writeText(text).then(() => status.textContent = "Copied to clipboard.").catch(() => {
+      const r = document.createRange(); r.selectNodeContents(document.querySelector(".picks-grid"));
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      status.textContent = "Copy was blocked. The list is selected; press Ctrl+C.";
+    });
+    return;
+  }
+  if (e.target.id === "clear") {
+    if (e.target.dataset.armed) { picks = {}; save(); show("picks"); document.getElementById("status").textContent = "All picks cleared."; }
+    else { e.target.dataset.armed = "1"; e.target.textContent = "Click again to clear"; document.getElementById("status").textContent = "This removes every pick you've marked."; }
+  }
+});
+
+const start = (location.hash || "").slice(1);
+const startContest = DATA.find(c => c.id === start);
+startContest ? show(startContest.s, startContest.id) : show(sec(start) ? start : "overview");
+</script>
